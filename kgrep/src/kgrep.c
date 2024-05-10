@@ -1,9 +1,9 @@
-#include "dgrep.h"
+#include "kgrep.h"
 
 int gidx = 0;
 node_t *nodes[256];
 static 
-node_t *dgrep_search_trie( dgrep_make_trie_t *trie, uchar_t * key, uchar_t * rest, search_status_t *status, int substring ){
+node_t *kgrep_search_trie( kgrep_make_trie_t *trie, uchar_t * key, uchar_t * rest, search_status_t *status, int substring ){
 
 	node_t *cnode;
 	node_t *tnode;
@@ -79,7 +79,7 @@ node_t *dgrep_search_trie( dgrep_make_trie_t *trie, uchar_t * key, uchar_t * res
 	}
 }
 
-static node_t *dgrep_match_trie( dgrep_make_trie_t *trie, uchar_t * key, uchar_t *rest, trie_status_t *status ){
+static node_t *kgrep_match_trie( kgrep_make_trie_t *trie, uchar_t * key, uchar_t *rest, trie_status_t *status ){
 
 	node_t *cnode;
 	node_t *tnode;
@@ -153,7 +153,7 @@ static node_t *dgrep_match_trie( dgrep_make_trie_t *trie, uchar_t * key, uchar_t
 
 }
 
-node_t *dgrep_make_node( ){
+node_t *kgrep_make_node( ){
 
 	node_t * node;
 
@@ -182,7 +182,7 @@ node_t *dgrep_make_node( ){
 	return node;
 }
 
-int dgrep_make_ynext_array( dgrep_make_trie_t *trie, node_t *node ){
+int kgrep_make_ynext_array( kgrep_make_trie_t *trie, node_t *node ){
 
 	int i;
 	node_t *tnode;
@@ -200,16 +200,16 @@ int dgrep_make_ynext_array( dgrep_make_trie_t *trie, node_t *node ){
 		}
 	}
 	if( node->ynext != NULL )
-		dgrep_make_ynext_array( trie, node->ynext );
+		kgrep_make_ynext_array( trie, node->ynext );
 
 	if( node->xnext != NULL )
-		dgrep_make_ynext_array( trie, node->xnext );
+		kgrep_make_ynext_array( trie, node->xnext );
 
 
 	return 1;
 }
 
-int dgrep_numbering( dgrep_make_trie_t *trie, node_t *node, int depth ){
+int kgrep_numbering( kgrep_make_trie_t *trie, node_t *node, int depth ){
 
 	if( node == NULL ) return -1;
 
@@ -242,15 +242,15 @@ int dgrep_numbering( dgrep_make_trie_t *trie, node_t *node, int depth ){
 	trie->node_num++;
 
 	if( node->xnext != NULL )
-		dgrep_numbering( trie, node->xnext,depth+1 );
+		kgrep_numbering( trie, node->xnext,depth+1 );
 	if( node->ynext != NULL )
-		dgrep_numbering( trie, node->ynext, depth );
+		kgrep_numbering( trie, node->ynext, depth );
 
 	return 1;
 }
 
 
-void dgrep_make_index_info( dgrep_make_trie_t *trie ){
+void kgrep_make_index_info( kgrep_make_trie_t *trie ){
 
 	int i;
 	if((trie->Index_Seek = (  uint_t *  ) malloc (  sizeof(  uint_t  ) * ( nodecount + 5 ) )) == NULL){
@@ -271,7 +271,7 @@ void dgrep_make_index_info( dgrep_make_trie_t *trie ){
 
 
 
-int dgrep_optimization( dgrep_make_trie_t *trie, node_t * node, int first ){
+int kgrep_optimization( kgrep_make_trie_t *trie, node_t * node, int first ){
 
 	node_t *tnode;
 
@@ -329,14 +329,14 @@ int dgrep_optimization( dgrep_make_trie_t *trie, node_t * node, int first ){
 	}
 
 	if( node->xnext != NULL )
-		dgrep_optimization( trie, node->xnext, 0 );
+		kgrep_optimization( trie, node->xnext, 0 );
 	if( node->ynext != NULL )
-		dgrep_optimization( trie, node->ynext, 0 );
+		kgrep_optimization( trie, node->ynext, 0 );
 
 	return 1;
 }
 
-int dgrep_insert_trie( dgrep_make_trie_t *trie, char * key, char *val ){
+int kgrep_insert_trie( kgrep_make_trie_t *trie, char * key, char *val ){
 
 	uchar_t* pRest;
 	uchar_t rest[KGREP_BUF_LEN];
@@ -354,12 +354,12 @@ int dgrep_insert_trie( dgrep_make_trie_t *trie, char * key, char *val ){
 	}
 
 	rest[0]   = '\0';
-	cnode     = dgrep_match_trie( trie,(uchar_t*) key, rest, &status );
+	cnode     = kgrep_match_trie( trie,(uchar_t*) key, rest, &status );
 	rest_size = strlen( (char*)rest );
 	pRest     = &rest[0];
 
 	if( rest_size >= 1 ){
-		nnode       = dgrep_make_node( );
+		nnode       = kgrep_make_node( );
 		nnode->code = *pRest;
 		pRest++;
 
@@ -386,7 +386,7 @@ int dgrep_insert_trie( dgrep_make_trie_t *trie, char * key, char *val ){
 	}
 
 	for( i = 1; i < rest_size; i++ ){
-		nnode        = dgrep_make_node(  );
+		nnode        = kgrep_make_node(  );
 		nnode->code  = *( pRest++ );
 		cnode->xnext = nnode;
 		cnode        = nnode;
@@ -396,19 +396,19 @@ int dgrep_insert_trie( dgrep_make_trie_t *trie, char * key, char *val ){
 	return 1;
 }
 
-int dgrep_build_trie( dgrep_make_trie_t* trie ){
+int kgrep_build_trie( kgrep_make_trie_t* trie ){
 
-	dgrep_optimization ( trie, trie->root,1  );
-	dgrep_make_index_info ( trie );
-	dgrep_numbering( trie, trie->root, 0 );
-	dgrep_make_ynext_array( trie, trie->root );
+	kgrep_optimization ( trie, trie->root,1  );
+	kgrep_make_index_info ( trie );
+	kgrep_numbering( trie, trie->root, 0 );
+	kgrep_make_ynext_array( trie, trie->root );
 	return 0;
 }
 
-dgrep_make_trie_t *dgrep_make_trie( ){
+kgrep_make_trie_t *kgrep_make_trie( ){
 
-	dgrep_make_trie_t *trie;
-	trie = malloc( sizeof( dgrep_make_trie_t ) );
+	kgrep_make_trie_t *trie;
+	trie = malloc( sizeof( kgrep_make_trie_t ) );
 	trie->root = NULL;
 	trie->node_num = 1;
 	return trie;
@@ -416,7 +416,7 @@ dgrep_make_trie_t *dgrep_make_trie( ){
 
 
 
-dgrep_t *dgrep_read_input_group_file( dgrep_t *dgrep, char * pattern_fn, char *group_name ){
+kgrep_t *kgrep_read_input_group_file( kgrep_t *kgrep, char * pattern_fn, char *group_name ){
 
 	FILE *fp;
 	char buffer[KGREP_BUF_LEN]= {0};
@@ -433,18 +433,18 @@ dgrep_t *dgrep_read_input_group_file( dgrep_t *dgrep, char * pattern_fn, char *g
 	char MOUM[] = {"ㅏ ㅐ ㅑ ㅒ ㅓ ㅔ ㅕ ㅖ ㅗ ㅘ ㅙ ㅚ ㅛ ㅜ ㅝ ㅞ ㅟ ㅠ ㅡ ㅢ ㅣ"};
 	char JAMO[] = {"ㄱ ㄲ ㄴ ㄷ ㄸ ㄹ ㅁ ㅂ ㅃ ㅅ ㅆ ㅇ ㅈ ㅉ ㅊ ㅋ ㅌ ㅍ ㅎ ㅏ ㅐ ㅑ ㅒ ㅓ ㅔ ㅕ ㅖ ㅗ ㅘ ㅙ ㅚ ㅛ ㅜ ㅝ ㅞ ㅟ ㅠ ㅡ ㅢ ㅣ"};
 
-	dgrep->trie = NULL;
+	kgrep->trie = NULL;
 	/* ************************
 	 * read pattern file 
 	 * ************************/
 
 	if( pattern_fn != NULL && *pattern_fn != '\0' ){
-		if( pattern_fn[0] == '\0' ) return dgrep;
+		if( pattern_fn[0] == '\0' ) return kgrep;
 		if((fp = fopen( pattern_fn, "r" )) == NULL ){
 				fprintf(stderr," file open error : %s\n", pattern_fn);
-				return dgrep;
+				return kgrep;
 		}
-		dgrep->trie = dgrep_make_trie();
+		kgrep->trie = kgrep_make_trie();
 		while( fgets(buffer,KGREP_BUF_LEN,fp) != NULL){
 				if(( p = strchr( buffer, '\n' )) != NULL ) *p = '\0';
 
@@ -453,7 +453,7 @@ dgrep_t *dgrep_read_input_group_file( dgrep_t *dgrep, char * pattern_fn, char *g
 
 				strcpy((char*)key, (char*)buffer );
 		strcpy((char*)val, (char*)p );
-		if(!dgrep_insert_trie( dgrep->trie, (char*)key, (char*)val ))
+		if(!kgrep_insert_trie( kgrep->trie, (char*)key, (char*)val ))
 			fprintf( stderr,"cannt insert trie : %s\n", key );
 		}
 		fclose(fp);
@@ -468,13 +468,13 @@ dgrep_t *dgrep_read_input_group_file( dgrep_t *dgrep, char * pattern_fn, char *g
 		else if( strcasecmp( group_name, "LOWER" ) == 0 ) plist = LOWER; 
 		else if( strcasecmp( group_name, "UPPER" ) == 0 ) plist = UPPER; 
 		else if( strcasecmp( group_name, "ALPHA" ) == 0 ) plist = ALPHA; 
-		if(dgrep->trie == NULL ) dgrep->trie = dgrep_make_trie();
+		if(kgrep->trie == NULL ) kgrep->trie = kgrep_make_trie();
 		if( plist != NULL ){
 			for( ; *plist != '\0'; plist++ ){
 				key[0] = *plist;
 				key[1] = '\0';
 				strcpy( val, key );
-				if(!dgrep_insert_trie( dgrep->trie, (char*)key, (char*)val ))
+				if(!kgrep_insert_trie( kgrep->trie, (char*)key, (char*)val ))
 					fprintf( stderr,"cannt insert trie : %s\n", key );
 			}
 		} else {
@@ -486,25 +486,25 @@ dgrep_t *dgrep_read_input_group_file( dgrep_t *dgrep, char * pattern_fn, char *g
 				for( token = strtok_r( plist, " ", &bp ); token != NULL; token = strtok_r( NULL, " ", &bp )){
 					strcpy( key, token );
 					strcpy( val, key );
-					if(!dgrep_insert_trie( dgrep->trie, (char*)key, (char*)val ))
+					if(!kgrep_insert_trie( kgrep->trie, (char*)key, (char*)val ))
 						fprintf( stderr,"cannt insert trie : %s\n", key );
 				}
 		}
 	}
 
-	if( dgrep->trie != NULL )
-	dgrep_build_trie( dgrep->trie );
-	return dgrep;
+	if( kgrep->trie != NULL )
+	kgrep_build_trie( kgrep->trie );
+	return kgrep;
 }
 
 
-node_t *dgrep_free_node( node_t *node ){
+node_t *kgrep_free_node( node_t *node ){
 
 	if( node->xnext != NULL )
-		node->xnext = dgrep_free_node( node->xnext );
+		node->xnext = kgrep_free_node( node->xnext );
 
 	if( node->ynext != NULL )
-		node->ynext = dgrep_free_node( node->ynext );
+		node->ynext = kgrep_free_node( node->ynext );
 
 	if(node->ycount > 0)
 		free( node->ynexts );
@@ -519,7 +519,7 @@ node_t *dgrep_free_node( node_t *node ){
 	return NULL;
 }
 
-void dgrep_free_trie( dgrep_make_trie_t *trie ){
+void kgrep_free_trie( kgrep_make_trie_t *trie ){
 
 	if( trie == NULL ) return;
 	if( trie->Index_Seek != NULL )
@@ -527,15 +527,15 @@ void dgrep_free_trie( dgrep_make_trie_t *trie ){
 	if( trie->Index_List != NULL )
 		free( trie->Index_List );
 	if( trie->root != NULL )
-		dgrep_free_node( trie->root );
+		kgrep_free_node( trie->root );
 	if( trie != NULL )
 		free( trie );
 	return;
 }
 
-void dgrep_free( dgrep_t * dgrep ){
-	dgrep_free_trie( dgrep->trie );
-	free( dgrep );
+void kgrep_free( kgrep_t * kgrep ){
+	kgrep_free_trie( kgrep->trie );
+	free( kgrep );
 }
 
 
@@ -596,13 +596,13 @@ int is_bold_position( int i, int* pos, int index ){
 	return -1;
 }
 
-void print_in_color_all( dgrep_t *dgrep, char *line, int *len, int *pos, int index ){
+void print_in_color_all( kgrep_t *kgrep, char *line, int *len, int *pos, int index ){
 
 	int i, j=0, x, s = 0;
 	int findex = 0;
-	int field_num = dgrep->field_num;
+	int field_num = kgrep->field_num;
 	char *s_string, *e_string;
-	char *delimiter = dgrep->delimiter;
+	char *delimiter = kgrep->delimiter;
 
 
 	s_string = e_string = line;
@@ -633,20 +633,20 @@ void print_in_color_all( dgrep_t *dgrep, char *line, int *len, int *pos, int ind
 	printf("\n");
 }
 
-void dgrep_print_result_all( dgrep_t *dgrep,  op_type_t op_type, char *line, int* pos, int* len, int index ){
+void kgrep_print_result_all( kgrep_t *kgrep,  op_type_t op_type, char *line, int* pos, int* len, int index ){
 
-	if( dgrep->op_type & COLOR ){
-		print_in_color_all( dgrep, line, len, pos, index );
+	if( kgrep->op_type & COLOR ){
+		print_in_color_all( kgrep, line, len, pos, index );
 	}else{
 		if( isatty( 1 ))
-			print_in_color_all( dgrep, line, len, pos, index );
+			print_in_color_all( kgrep, line, len, pos, index );
 		else
 			printf("%s\n", line );
 	}
 }
 
 
-void dgrep_print_result( op_type_t op_type,  char *value, char *line, int pos ){
+void kgrep_print_result( op_type_t op_type,  char *value, char *line, int pos ){
 
 	if( isatty( 1 ))
 		printf("%s%s%s\t%s\n", RED, value, RESET, line );
@@ -671,38 +671,38 @@ int c_utflen( char c ){
 	return 1;
 }
 
-int dgrep_prefix_match( dgrep_t * dgrep, char * string, char *line ){
+int kgrep_prefix_match( kgrep_t * kgrep, char * string, char *line ){
 
 	int found = 0;
 	node_t *cnode;
 	char rest[KGREP_BUF_LEN];
 	search_status_t status;
-	if((cnode = dgrep_search_trie( dgrep->trie, (uchar_t*) string, (uchar_t*)rest, &status, 0 )) != NULL ){
+	if((cnode = kgrep_search_trie( kgrep->trie, (uchar_t*) string, (uchar_t*)rest, &status, 0 )) != NULL ){
 		if( cnode->val != NULL && status != NO_MATCH ){
 			found++;
-			if( !(dgrep->op_type & INVERSE) ){
-				dgrep_print_result( dgrep->op_type,  cnode->val, line, 0 );
+			if( !(kgrep->op_type & INVERSE) ){
+				kgrep_print_result( kgrep->op_type,  cnode->val, line, 0 );
 			}
 		}
 	}
 
-	if( !found && dgrep->op_type & INVERSE )
+	if( !found && kgrep->op_type & INVERSE )
 		printf("%s\n", line );
 	return 0;
 }
 
-int dgrep_suffix_match( dgrep_t * dgrep, char * string, char *line ){
+int kgrep_suffix_match( kgrep_t * kgrep, char * string, char *line ){
 
 	int found = 0, clen;
 	node_t  *cnode;
 	char rest[KGREP_BUF_LEN], *pstring;
 	search_status_t status;
 	for( pstring = string; *pstring != '\0'; pstring += clen ){
-		if((cnode = dgrep_search_trie( dgrep->trie, (uchar_t*) pstring, (uchar_t*)rest, &status, 0 )) != NULL ){
+		if((cnode = kgrep_search_trie( kgrep->trie, (uchar_t*) pstring, (uchar_t*)rest, &status, 0 )) != NULL ){
 			if( cnode->val != NULL && status != NO_MATCH && rest[0] == '\0' ){
 				found++;
-				if( !(dgrep->op_type & INVERSE) ){
-					dgrep_print_result( dgrep->op_type,  cnode->val, line, pstring-string );
+				if( !(kgrep->op_type & INVERSE) ){
+					kgrep_print_result( kgrep->op_type,  cnode->val, line, pstring-string );
 				}
 				if( found >= 1024 ) break;
 			}
@@ -710,12 +710,12 @@ int dgrep_suffix_match( dgrep_t * dgrep, char * string, char *line ){
 		clen = c_utflen( *pstring );
 	}
 
-	if( !found && dgrep->op_type & INVERSE )
+	if( !found && kgrep->op_type & INVERSE )
 		printf("%s\n", line );
 	return 0;
 }
 
-int dgrep_substring_match( dgrep_t * dgrep, char * string, char *line ){
+int kgrep_substring_match( kgrep_t * kgrep, char * string, char *line ){
 
 	int len[1024];
 	int pos[1024], clen;
@@ -723,11 +723,11 @@ int dgrep_substring_match( dgrep_t * dgrep, char * string, char *line ){
 	char rest[KGREP_BUF_LEN], *pstring;
 	search_status_t status;
 	for( pstring = string; *pstring != '\0'; pstring += clen ){
-		dgrep_search_trie( dgrep->trie, (uchar_t*) pstring, (uchar_t*)rest, &status, 1 );
+		kgrep_search_trie( kgrep->trie, (uchar_t*) pstring, (uchar_t*)rest, &status, 1 );
 		if( gidx > 0 ){
-			if( !(dgrep->op_type & INVERSE) ){
-				if( (dgrep->op_type & MATCH_PATTERN) ){
-					dgrep_print_result( dgrep->op_type,  nodes[gidx-1]->val, line, pstring-string );
+			if( !(kgrep->op_type & INVERSE) ){
+				if( (kgrep->op_type & MATCH_PATTERN) ){
+					kgrep_print_result( kgrep->op_type,  nodes[gidx-1]->val, line, pstring-string );
 				} else {
 					for( i = 0; i < gidx; i++ ){
 						pos[found] = pstring-string;
@@ -741,126 +741,126 @@ int dgrep_substring_match( dgrep_t * dgrep, char * string, char *line ){
 		}
 		clen = c_utflen( *pstring );
 	}
-	if( !(dgrep->op_type & MATCH_PATTERN) ){
-		if( dgrep->op_type & INVERSE ){
+	if( !(kgrep->op_type & MATCH_PATTERN) ){
+		if( kgrep->op_type & INVERSE ){
 			if( found == 0 )
 				printf("%s\n", line );
 		} else {
 			if( found > 0 )
-				dgrep_print_result_all( dgrep,  dgrep->op_type, line, pos, len, found );
+				kgrep_print_result_all( kgrep,  kgrep->op_type, line, pos, len, found );
 		}
 	}
 
 	return 0;
 }
 
-int dgrep_exact_match( dgrep_t * dgrep, char * string, char *line ){
+int kgrep_exact_match( kgrep_t * kgrep, char * string, char *line ){
 
 	node_t    *cnode;
 	int found = 0;
 	char rest[KGREP_BUF_LEN];
 	search_status_t status;
 	printf("%s\n", __FUNCTION__ );
-	if((cnode = dgrep_search_trie( dgrep->trie, (uchar_t*) string, (uchar_t*)rest, &status, 0 )) != NULL ){
+	if((cnode = kgrep_search_trie( kgrep->trie, (uchar_t*) string, (uchar_t*)rest, &status, 0 )) != NULL ){
 		if( cnode->val != NULL && status == FULL_MATCH ){
 			found++;
-			if( !(dgrep->op_type & INVERSE) ){
-				dgrep_print_result( dgrep->op_type,  cnode->val, line, 0 );
+			if( !(kgrep->op_type & INVERSE) ){
+				kgrep_print_result( kgrep->op_type,  cnode->val, line, 0 );
 			}
 		}
 	}
 
-	if( !found && dgrep->op_type & INVERSE )
+	if( !found && kgrep->op_type & INVERSE )
 		printf("%s\n", line );
 	return 0;
 }
 
-int dgrep_match_in_line( dgrep_t *dgrep, char* buffer ){
+int kgrep_match_in_line( kgrep_t *kgrep, char* buffer ){
 
 	int findex = 1;
 	char line[KGREP_BUF_LEN], *s_string, *e_string;
 	strcpy( line, buffer );
 	s_string = e_string = buffer;
 
-	for( e_string = strstr( s_string, dgrep->delimiter ), findex=1; \
+	for( e_string = strstr( s_string, kgrep->delimiter ), findex=1; \
 		e_string != NULL; \
-		e_string = strstr( s_string, dgrep->delimiter ), findex++){ 
+		e_string = strstr( s_string, kgrep->delimiter ), findex++){ 
 		e_string[0] = '\0';
-		if( findex == dgrep->field_num ){
-			if( (dgrep->op_type &  PREFIX ) == PREFIX ) dgrep_prefix_match( dgrep, s_string, line );
-			else if( (dgrep->op_type & SUFFIX ) == SUFFIX ) dgrep_suffix_match( dgrep, s_string, line ); 
-			else if( (dgrep->op_type & SUBSTRING ) == SUBSTRING ) dgrep_substring_match( dgrep, s_string, line );
-			else dgrep_exact_match( dgrep, s_string, line );
+		if( findex == kgrep->field_num ){
+			if( (kgrep->op_type &  PREFIX ) == PREFIX ) kgrep_prefix_match( kgrep, s_string, line );
+			else if( (kgrep->op_type & SUFFIX ) == SUFFIX ) kgrep_suffix_match( kgrep, s_string, line ); 
+			else if( (kgrep->op_type & SUBSTRING ) == SUBSTRING ) kgrep_substring_match( kgrep, s_string, line );
+			else kgrep_exact_match( kgrep, s_string, line );
 		}
-		e_string += strlen( dgrep->delimiter );
+		e_string += strlen( kgrep->delimiter );
 		s_string = e_string;
 	}///end for
 
 
-	if( findex == dgrep->field_num ){
-		if( (dgrep->op_type &  PREFIX ) == PREFIX ) dgrep_prefix_match( dgrep, s_string, line );
-		else if( (dgrep->op_type & SUFFIX ) == SUFFIX ) dgrep_suffix_match( dgrep, s_string, line ); 
-		else if( (dgrep->op_type & SUBSTRING ) == SUBSTRING ) dgrep_substring_match( dgrep, s_string, line );
-		else dgrep_exact_match( dgrep, s_string, line );
+	if( findex == kgrep->field_num ){
+		if( (kgrep->op_type &  PREFIX ) == PREFIX ) kgrep_prefix_match( kgrep, s_string, line );
+		else if( (kgrep->op_type & SUFFIX ) == SUFFIX ) kgrep_suffix_match( kgrep, s_string, line ); 
+		else if( (kgrep->op_type & SUBSTRING ) == SUBSTRING ) kgrep_substring_match( kgrep, s_string, line );
+		else kgrep_exact_match( kgrep, s_string, line );
 	}
 	return 0;
 }
 
 
-int dgrep_matching( dgrep_t * dgrep ){
+int kgrep_matching( kgrep_t * kgrep ){
 
-	FILE *fp = dgrep->fp;
+	FILE *fp = kgrep->fp;
 	char buffer[KGREP_BUF_LEN], *p;
 
 	while( fgets( buffer, KGREP_BUF_LEN, fp ) != NULL ){
 		if(( p = strchr( buffer, '\n' )) != NULL ) *p = '\0';
-		dgrep_match_in_line( dgrep, buffer );
+		kgrep_match_in_line( kgrep, buffer );
 	}
 
 
 	return 0;
 }
 
-dgrep_t *dgrep_load_group( dgrep_t *dgrep, char* pattern, char* group ){
+kgrep_t *kgrep_load_group( kgrep_t *kgrep, char* pattern, char* group ){
 
-	if( ( dgrep->op_type & PATTERN_FILE ) && ( dgrep->op_type & EXPAND )){
-		return dgrep_read_input_group_file( dgrep, pattern, group );
-	} else if( ( dgrep->op_type & PATTERN_FILE )){
-		return dgrep_read_input_group_file( dgrep, pattern, NULL );
-	} else if( ( dgrep->op_type & EXPAND )){
-		return dgrep_read_input_group_file( dgrep, NULL, group );
+	if( ( kgrep->op_type & PATTERN_FILE ) && ( kgrep->op_type & EXPAND )){
+		return kgrep_read_input_group_file( kgrep, pattern, group );
+	} else if( ( kgrep->op_type & PATTERN_FILE )){
+		return kgrep_read_input_group_file( kgrep, pattern, NULL );
+	} else if( ( kgrep->op_type & EXPAND )){
+		return kgrep_read_input_group_file( kgrep, NULL, group );
 	}
-	return dgrep;
+	return kgrep;
 }
 
-void set_opt( dgrep_t *dgrep, int opt ){
-	dgrep->op_type |= opt;
+void set_opt( kgrep_t *kgrep, int opt ){
+	kgrep->op_type |= opt;
 }
 
-dgrep_t *dgrep_make_dgrep( ){
-	dgrep_t *dgrep;
-	dgrep = malloc(sizeof(dgrep_t));
-	memset( dgrep, 0, sizeof(dgrep_t));
-	dgrep->fp = stdin;
-	dgrep->op_type = NONE;
-	dgrep->delimiter[0] = '\n';
-	dgrep->field_num = 1;
-	dgrep->trie = NULL;
+kgrep_t *kgrep_make_kgrep( ){
+	kgrep_t *kgrep;
+	kgrep = malloc(sizeof(kgrep_t));
+	memset( kgrep, 0, sizeof(kgrep_t));
+	kgrep->fp = stdin;
+	kgrep->op_type = NONE;
+	kgrep->delimiter[0] = '\n';
+	kgrep->field_num = 1;
+	kgrep->trie = NULL;
 
-	return dgrep;
-}
-
-
-void set_delimiter( dgrep_t *dgrep, char* delimiter ){
-	strcpy( dgrep->delimiter, delimiter );
+	return kgrep;
 }
 
 
-void set_field( dgrep_t *dgrep, char *field ){
-	dgrep->field_num = atoi( field );
+void set_delimiter( kgrep_t *kgrep, char* delimiter ){
+	strcpy( kgrep->delimiter, delimiter );
 }
 
-dgrep_t *read_dgrep_opt( dgrep_t *dgrep, int argc, char *argv[] ){
+
+void set_field( kgrep_t *kgrep, char *field ){
+	kgrep->field_num = atoi( field );
+}
+
+kgrep_t *read_kgrep_opt( kgrep_t *kgrep, int argc, char *argv[] ){
 
 	int op;
 	int option_index = 0;
@@ -881,61 +881,61 @@ dgrep_t *read_dgrep_opt( dgrep_t *dgrep, int argc, char *argv[] ){
 	{"match",        no_argument, 0, 'm'},
 	{0, 0, 0, 0} };
 
-	dgrep->field_num = 1;
+	kgrep->field_num = 1;
 	strcpy( delimiter, "\t" );
 	while( (op = getopt_long( argc, argv, "hf:e:d:k:smv", long_options, &option_index )) != -1 ){
 		switch( op ) {
 			case 0 :
-				if(      !strcmp( "prefix", long_options[option_index].name  )){ set_opt( dgrep, PREFIX);
-				}else if( !strcmp( "suffix", long_options[option_index].name )){ set_opt( dgrep, SUFFIX); } break;
-			case 'f' : sprintf( pattern, "%s", optarg); set_opt( dgrep, PATTERN_FILE ); break;
+				if(      !strcmp( "prefix", long_options[option_index].name  )){ set_opt( kgrep, PREFIX);
+				}else if( !strcmp( "suffix", long_options[option_index].name )){ set_opt( kgrep, SUFFIX); } break;
+			case 'f' : sprintf( pattern, "%s", optarg); set_opt( kgrep, PATTERN_FILE ); break;
 			case 'd' : sprintf( delimiter, "%s", optarg); break;
-			case 'k' : sprintf( field, "%s", optarg); dgrep->field_num = atoi(field); break;
-			case 'e' : sprintf( group, "%s", optarg ); set_opt( dgrep, EXPAND);  break;
-			case 's' : set_opt( dgrep, SUBSTRING); break;
-			case 'v' : set_opt( dgrep, INVERSE);   break;
-			case 'm' : set_opt( dgrep, MATCH_PATTERN); break;
-			case 'h' : help( argv[0] ); return dgrep; break;
-			default  : break; return dgrep;
+			case 'k' : sprintf( field, "%s", optarg); kgrep->field_num = atoi(field); break;
+			case 'e' : sprintf( group, "%s", optarg ); set_opt( kgrep, EXPAND);  break;
+			case 's' : set_opt( kgrep, SUBSTRING); break;
+			case 'v' : set_opt( kgrep, INVERSE);   break;
+			case 'm' : set_opt( kgrep, MATCH_PATTERN); break;
+			case 'h' : help( argv[0] ); return kgrep; break;
+			default  : break; return kgrep;
 		}
 	}
-	set_delimiter( dgrep, delimiter );
-	set_field( dgrep, field );
-	dgrep = dgrep_load_group( dgrep, pattern, group );
-	return dgrep;
+	set_delimiter( kgrep, delimiter );
+	set_field( kgrep, field );
+	kgrep = kgrep_load_group( kgrep, pattern, group );
+	return kgrep;
 }
 
 int main(int argc, char *argv[]){
 
 	int file_count = 0;
-	dgrep_t *dgrep;
+	kgrep_t *kgrep;
 
 	if( argc == 1 ){ return help( argv[0] );  }
 
-	dgrep = dgrep_make_dgrep( );
-	if( (dgrep = read_dgrep_opt( dgrep, argc, argv )) == NULL) return 0;
+	kgrep = kgrep_make_kgrep( );
+	if( (kgrep = read_kgrep_opt( kgrep, argc, argv )) == NULL) return 0;
 
 	if( optind < argc ) {
 		while( optind < argc ){
 			// 패턴 목록 파일을 읽지 못한 경우에는 첫번째 인자를 패턴으로 인식한다
-			if( dgrep->trie  ){
-				if((dgrep->fp = fopen( argv[optind++], "r" )) == NULL ){
+			if( kgrep->trie  ){
+				if((kgrep->fp = fopen( argv[optind++], "r" )) == NULL ){
 					fprintf( stderr, "[ERROR] : cannot open file : %s\n", argv[optind-1] );
 				}else{
 					file_count++;
-					dgrep_matching( dgrep ); 
-					fclose( dgrep->fp );
+					kgrep_matching( kgrep ); 
+					fclose( kgrep->fp );
 				}
 			}else{
-				dgrep->trie = dgrep_make_trie( );
-				dgrep_insert_trie( dgrep->trie, argv[optind], argv[optind] );
-				dgrep_build_trie( dgrep->trie );
+				kgrep->trie = kgrep_make_trie( );
+				kgrep_insert_trie( kgrep->trie, argv[optind], argv[optind] );
+				kgrep_build_trie( kgrep->trie );
 				optind++;
 			}
 		}
 	}
 
-	if( !file_count ) dgrep_matching( dgrep ); 
-	dgrep_free( dgrep );
+	if( !file_count ) kgrep_matching( kgrep ); 
+	kgrep_free( kgrep );
 	return 0;
 }
