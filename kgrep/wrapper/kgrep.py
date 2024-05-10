@@ -88,7 +88,7 @@ class Dgrep(ctypes.Structure):
 #############
 # functions #
 #############
-class DGREP(object):
+class KGREP(object):
     """
     kgrep wrapper
     """

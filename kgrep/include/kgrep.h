@@ -1,5 +1,5 @@
-#ifndef __DGREP_H__
-#define __DGREP_H___
+#ifndef __KGREP_H__
+#define __KGREP_H___
 
 //#include <google/profiler.h>
 #include <stdio.h>
@@ -16,7 +16,7 @@
 #define PUBLIC 
 #define PRIVATE static
 
-#define DGREP_BUF_LEN 1024000
+#define KGREP_BUF_LEN 1024000
 
 
 /*********************************************************

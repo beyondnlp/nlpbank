@@ -339,7 +339,7 @@ int dgrep_optimization( dgrep_make_trie_t *trie, node_t * node, int first ){
 int dgrep_insert_trie( dgrep_make_trie_t *trie, char * key, char *val ){
 
 	uchar_t* pRest;
-	uchar_t rest[DGREP_BUF_LEN];
+	uchar_t rest[KGREP_BUF_LEN];
 	trie_status_t status;
 
 	node_t *nnode;
@@ -419,10 +419,10 @@ dgrep_make_trie_t *dgrep_make_trie( ){
 dgrep_t *dgrep_read_input_group_file( dgrep_t *dgrep, char * pattern_fn, char *group_name ){
 
 	FILE *fp;
-	char buffer[DGREP_BUF_LEN]= {0};
+	char buffer[KGREP_BUF_LEN]= {0};
 	char *p = NULL, *token, *bp, *plist = NULL;
-	char key[DGREP_BUF_LEN]   = {0};
-	char val[DGREP_BUF_LEN]   = {0};
+	char key[KGREP_BUF_LEN]   = {0};
+	char val[KGREP_BUF_LEN]   = {0};
 
 	char DIGIT[] = {"0123456789"};
 	char LOWER[] = {"abcdefghijklmnopqrstuvwxyz"};
@@ -445,7 +445,7 @@ dgrep_t *dgrep_read_input_group_file( dgrep_t *dgrep, char * pattern_fn, char *g
 				return dgrep;
 		}
 		dgrep->trie = dgrep_make_trie();
-		while( fgets(buffer,DGREP_BUF_LEN,fp) != NULL){
+		while( fgets(buffer,KGREP_BUF_LEN,fp) != NULL){
 				if(( p = strchr( buffer, '\n' )) != NULL ) *p = '\0';
 
 				if(( p = strchr( buffer, '\t' )) != NULL ) { *p = '\0'; p++; }
@@ -675,7 +675,7 @@ int dgrep_prefix_match( dgrep_t * dgrep, char * string, char *line ){
 
 	int found = 0;
 	node_t *cnode;
-	char rest[DGREP_BUF_LEN];
+	char rest[KGREP_BUF_LEN];
 	search_status_t status;
 	if((cnode = dgrep_search_trie( dgrep->trie, (uchar_t*) string, (uchar_t*)rest, &status, 0 )) != NULL ){
 		if( cnode->val != NULL && status != NO_MATCH ){
@@ -695,7 +695,7 @@ int dgrep_suffix_match( dgrep_t * dgrep, char * string, char *line ){
 
 	int found = 0, clen;
 	node_t  *cnode;
-	char rest[DGREP_BUF_LEN], *pstring;
+	char rest[KGREP_BUF_LEN], *pstring;
 	search_status_t status;
 	for( pstring = string; *pstring != '\0'; pstring += clen ){
 		if((cnode = dgrep_search_trie( dgrep->trie, (uchar_t*) pstring, (uchar_t*)rest, &status, 0 )) != NULL ){
@@ -720,7 +720,7 @@ int dgrep_substring_match( dgrep_t * dgrep, char * string, char *line ){
 	int len[1024];
 	int pos[1024], clen;
 	int found = 0, i;
-	char rest[DGREP_BUF_LEN], *pstring;
+	char rest[KGREP_BUF_LEN], *pstring;
 	search_status_t status;
 	for( pstring = string; *pstring != '\0'; pstring += clen ){
 		dgrep_search_trie( dgrep->trie, (uchar_t*) pstring, (uchar_t*)rest, &status, 1 );
@@ -758,7 +758,7 @@ int dgrep_exact_match( dgrep_t * dgrep, char * string, char *line ){
 
 	node_t    *cnode;
 	int found = 0;
-	char rest[DGREP_BUF_LEN];
+	char rest[KGREP_BUF_LEN];
 	search_status_t status;
 	printf("%s\n", __FUNCTION__ );
 	if((cnode = dgrep_search_trie( dgrep->trie, (uchar_t*) string, (uchar_t*)rest, &status, 0 )) != NULL ){
@@ -778,7 +778,7 @@ int dgrep_exact_match( dgrep_t * dgrep, char * string, char *line ){
 int dgrep_match_in_line( dgrep_t *dgrep, char* buffer ){
 
 	int findex = 1;
-	char line[DGREP_BUF_LEN], *s_string, *e_string;
+	char line[KGREP_BUF_LEN], *s_string, *e_string;
 	strcpy( line, buffer );
 	s_string = e_string = buffer;
 
@@ -810,9 +810,9 @@ int dgrep_match_in_line( dgrep_t *dgrep, char* buffer ){
 int dgrep_matching( dgrep_t * dgrep ){
 
 	FILE *fp = dgrep->fp;
-	char buffer[DGREP_BUF_LEN], *p;
+	char buffer[KGREP_BUF_LEN], *p;
 
-	while( fgets( buffer, DGREP_BUF_LEN, fp ) != NULL ){
+	while( fgets( buffer, KGREP_BUF_LEN, fp ) != NULL ){
 		if(( p = strchr( buffer, '\n' )) != NULL ) *p = '\0';
 		dgrep_match_in_line( dgrep, buffer );
 	}
@@ -865,9 +865,9 @@ dgrep_t *read_dgrep_opt( dgrep_t *dgrep, int argc, char *argv[] ){
 	int op;
 	int option_index = 0;
 	char delimiter[8];
-	char field[DGREP_BUF_LEN]={0};
-	char group[DGREP_BUF_LEN]={0};
-	char pattern[DGREP_BUF_LEN]={0};
+	char field[KGREP_BUF_LEN]={0};
+	char group[KGREP_BUF_LEN]={0};
+	char pattern[KGREP_BUF_LEN]={0};
 	static struct option long_options[11] =  {
 	{"help",         no_argument, 0, 'h'},
 	{"file",         no_argument, 0, 'f'},
