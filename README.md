@@ -1,2 +1,2 @@
 # nlpbank
-string libaray about natural language processing
+string library about natural language processing
